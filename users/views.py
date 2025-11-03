@@ -3,7 +3,6 @@ from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from users.models import Profile
 
-
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
