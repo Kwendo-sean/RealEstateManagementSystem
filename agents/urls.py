@@ -1,9 +1,16 @@
-from django.urls import path
-from . import views
+from django.contrib import admin
+from django.shortcuts import redirect
+from django.urls import path, include
 
 urlpatterns = [
-    path('', views.agent_list, name='agent_list'),            # Agents page
-    path('dashboard/', views.dashboard, name='dashboard'),    # Dashboard page
-    path('properties/', views.properties, name='properties'),# Properties page
-    path('clients/', views.clients, name='clients'),         # Clients page
+    path('admin/', admin.site.urls),
+    
+    # Redirect root to login page
+    path('', lambda request: redirect('login')),
+    
+    # Include user authentication URLs
+    path('', include('users.urls')),
+    
+    # Include M-Pesa payments app URLs
+    path('payments/', include('payments.urls')),
 ]
