@@ -1,26 +1,14 @@
-from pathlib import Path
 import os
-from dotenv import load_dotenv
+from pathlib import Path
 
-# Load environment variables
-BASE_DIR = Path(_file_).resolve().parent.parent
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# M-Pesa API credentials
-MPESA_CONSUMER_KEY = os.getenv('MPESA_CONSUMER_KEY')
-MPESA_CONSUMER_SECRET = os.getenv('MPESA_CONSUMER_SECRET')
-MPESA_SHORTCODE = os.getenv('MPESA_SHORTCODE')
-MPESA_PASSKEY = os.getenv('MPESA_PASSKEY')
-MPESA_BASE_URL = os.getenv('MPESA_BASE_URL')
-
-SECRET_KEY = 'django-insecure-6gx@usl+s#4u0l&wa$k5r!*c1qi4uw7#l%33_$dt&@5vmo%toy'
+SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
 
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
-# Installed apps
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -28,12 +16,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    # Local apps
-    'users',
-    'payments',
+    
+    'users.apps.UsersConfig'
+    
+ 
 ]
 
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -45,17 +35,16 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-
-ROOT_URLCONF = 'real_estate.urls'
-
+ROOT_URLCONF = 'realestate.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -64,9 +53,7 @@ TEMPLATES = [
     },
 ]
 
-
-WSGI_APPLICATION = 'real_estate.wsgi.application'
-
+WSGI_APPLICATION = 'realestate.wsgi.application'
 
 # Database
 DATABASES = {
@@ -75,7 +62,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -93,16 +79,22 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Localization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-
-# Static files
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'users.User'
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'home'
+LOGIN_URL = 'login'
+
