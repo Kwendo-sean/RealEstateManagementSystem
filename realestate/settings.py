@@ -1,13 +1,10 @@
 from pathlib import Path
 import os
-from dotenv import load_dotenv
+import base64
+import requests
+from datetime import datetime
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv()
-MPESA_CONSUMER_KEY = os.getenv('MPESA_CONSUMER_KEY')
-MPESA_CONSUMER_SECRET = os.getenv('MPESA_CONSUMER_SECRET')
-MPESA_SHORTCODE = os.getenv('MPESA_SHORTCODE')
-MPESA_PASSKEY = os.getenv('MPESA_PASSKEY')
-MPESA_BASE_URL = os.getenv('MPESA_BASE_URL')
+
 
 SECRET_KEY = 'django-insecure-6gx@usl+s#4u0l&wa$k5r!*c1qi4uw7#l%33_$dt&@5vmo%toy'
 
@@ -39,12 +36,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'real_estate.urls'
+ROOT_URLCONF = 'realestate.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -56,7 +53,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'real_estate.wsgi.application'
+WSGI_APPLICATION = 'realestate.wsgi.application'
 
 
 
@@ -102,3 +99,40 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+MPESA_ENVIRONMENT = 'sandbox'
+MPESA_CONSUMER_KEY = 'ZkYbCsnFP2fAvV2hi3iTOXHZ8P3j3XTkEJw0elvnoM8V8wrH'
+MPESA_CONSUMER_SECRET = 'frnYkVjA3J2VFii7adfA0WQbNiZimadw28G0XPqHC7M1sUGggGlfaqrZwuJyZItj'
+MPESA_SHORTCODE = '174379'  
+MPESA_PASSKEY = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'  
+
+MPESA_CALLBACK_URL = 'https://708fbdcb265b.ngrok-free.app/payments/mpesa-callback/'
+
+if MPESA_ENVIRONMENT == 'sandbox':
+    MPESA_AUTH_URL = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+    MPESA_STK_PUSH_URL = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+    MPESA_QUERY_URL = 'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query'
+else:
+    MPESA_AUTH_URL = 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+    MPESA_STK_PUSH_URL = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+    MPESA_QUERY_URL = 'https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query'
+
+def get_mpesa_access_token():
+    """Get MPesa access token"""
+    try:
+        response = requests.get(
+            MPESA_AUTH_URL,
+            auth=(MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET),
+            timeout=30
+        )
+        response.raise_for_status()
+        return response.json()['access_token']
+    except Exception as e:
+        print(f"Error getting MPesa access token: {e}")
+        return None
+
+def generate_mpesa_password():
+    """Generate MPesa password"""
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    data_to_encode = MPESA_SHORTCODE + MPESA_PASSKEY + timestamp
+    encoded_string = base64.b64encode(data_to_encode.encode()).decode()
+    return encoded_string, timestamp

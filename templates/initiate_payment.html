@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initiate Payment - Real Estate</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .payment-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .property-info {
+            background: var(--bg-light);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .help-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .format-example {
+            background: var(--info-light);
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <h1>Initiate MPesa Payment</h1>
+        
+        <div class="property-info">
+            <h3>{{ property.title }}</h3>
+            <p><strong>Amount:</strong> KSh {{ property.price|floatformat:0 }}</p>
+            <p><strong>Location:</strong> {{ property.location }}</p>
+            <p><strong>Property ID:</strong> {{ property.id }}</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="phone_number">MPesa Registered Phone Number</label>
+                <input type="text" 
+                       id="phone_number" 
+                       name="phone_number" 
+                       placeholder="e.g., 254708374149" 
+                       value="2547"
+                       required
+                       pattern="2547[0-9]{8}"
+                       title="Please enter a valid MPesa phone number starting with 2547">
+                <div class="help-text">
+                    Enter your MPesa registered phone number in the exact format: 2547XXXXXXXX
+                </div>
+                
+                <div class="format-example">
+                    <strong>Test Numbers (Sandbox):</strong><br>
+                    • 254708374149<br>
+                    • 254712345678<br>
+                    Format must be exactly: 2547XXXXXXXX (12 digits total)
+                </div>
+            </div>
+
+            <div class="form-group">
+                <p><strong>You will receive an MPesa STK Push prompt on your phone to complete the payment.</strong></p>
+                <p><small>After initiating payment, check your phone for the MPesa prompt and enter your PIN to complete the transaction.</small></p>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-credit-card"></i>
+                    Initiate MPesa Payment
+                </button>
+                <a href="{% url 'properties:property_detail' property.id %}" class="btn btn-outline">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,455 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Payments - Real Estate</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<div class="dashboard-container">
+    <div class="navigation-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Real Estate CRM</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="{% url 'properties:property_list' %}"><i class="fas fa-building"></i> Properties</a></li>
+                    <li><a href="{% url 'properties:favorite_properties' %}"><i class="fas fa-heart"></i> My Favorites</a></li>
+                    <li><a href="{% url 'properties:my_inquiries' %}"><i class="fas fa-envelope"></i> My Inquiries</a></li>
+                    <li class="active"><a href="{% url 'payments:my_payments' %}"><i class="fas fa-credit-card"></i> Payments</a></li>
+                    <li><a href="{% url 'users:profile' %}"><i class="fas fa-user"></i> My Profile</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="{% url 'home' %}" class="btn btn-text"><i class="fas fa-globe"></i> Home Page</a>
+                <a href="{% url 'users:logout' %}" class="btn btn-text"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1>My Payments</h1>
+                    <p>View your payment history and transaction details</p>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
+                {% if transactions %}
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Payment History</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="transactions-list">
+                            {% for transaction in transactions %}
+                            <div class="transaction-item">
+                                <div class="transaction-main">
+                                    <div class="transaction-header">
+                                        <div class="transaction-property">
+                                            <h4>{{ transaction.property.title }}</h4>
+                                            <p class="property-location">{{ transaction.property.location }}</p>
+                                        </div>
+                                        <div class="transaction-amount">
+                                            <strong>KSh {{ transaction.amount|floatformat:0 }}</strong>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="transaction-details">
+                                        <div class="transaction-meta">
+                                            <span class="transaction-date">
+                                                <i class="fas fa-calendar"></i>
+                                                {{ transaction.created_at|date:"M d, Y H:i" }}
+                                            </span>
+                                            <span class="transaction-status {{ transaction.status }}">
+                                                {{ transaction.status|title }}
+                                            </span>
+                                            {% if transaction.mpesa_receipt_number %}
+                                            <span class="transaction-receipt">
+                                                <i class="fas fa-receipt"></i>
+                                                {{ transaction.mpesa_receipt_number }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        {% if transaction.result_desc %}
+                                        <div class="transaction-message">
+                                            {{ transaction.result_desc }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-credit-card fa-3x"></i>
+                    <h3>No Payments Yet</h3>
+                    <p>You haven't made any payments yet. Browse properties and make your first payment!</p>
+                    <a href="{% url 'properties:property_list' %}" class="btn btn-primary">Browse Properties</a>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+    .transactions-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .transaction-item {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .transaction-item:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .transaction-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .transaction-property h4 {
+        margin: 0 0 0.25rem;
+        color: var(--text-primary);
+    }
+
+    .property-location {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .transaction-amount {
+        font-size: 1.25rem;
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+
+    .transaction-details {
+        border-top: 1px solid var(--border-color);
+        padding-top: 1rem;
+    }
+
+    .transaction-meta {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.5rem;
+    }
+
+    .transaction-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .transaction-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .transaction-status.pending {
+        background: var(--warning-light);
+        color: var(--warning);
+    }
+
+    .transaction-status.completed {
+        background: var(--success-light);
+        color: var(--success);
+    }
+
+    .transaction-status.failed {
+        background: var(--danger-light);
+        color: var(--danger);
+    }
+
+    .transaction-message {
+        background: var(--bg-light);
+        padding: 0.75rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        margin-bottom: 1rem;
+        color: var(--color-gray-light);
+    }
+
+    .empty-state h3 {
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    @media (max-width: 768px) {
+        .transaction-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .transaction-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Payments - Real Estate</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<div class="dashboard-container">
+    <div class="navigation-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Real Estate CRM</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="{% url 'properties:property_list' %}"><i class="fas fa-building"></i> Properties</a></li>
+                    <li><a href="{% url 'properties:favorite_properties' %}"><i class="fas fa-heart"></i> My Favorites</a></li>
+                    <li><a href="{% url 'properties:my_inquiries' %}"><i class="fas fa-envelope"></i> My Inquiries</a></li>
+                    <li class="active"><a href="{% url 'payments:my_payments' %}"><i class="fas fa-credit-card"></i> Payments</a></li>
+                    <li><a href="{% url 'users:profile' %}"><i class="fas fa-user"></i> My Profile</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="{% url 'home' %}" class="btn btn-text"><i class="fas fa-globe"></i> Home Page</a>
+                <a href="{% url 'users:logout' %}" class="btn btn-text"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1>My Payments</h1>
+                    <p>View your payment history and transaction details</p>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
+                {% if transactions %}
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Payment History</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="transactions-list">
+                            {% for transaction in transactions %}
+                            <div class="transaction-item">
+                                <div class="transaction-main">
+                                    <div class="transaction-header">
+                                        <div class="transaction-property">
+                                            <h4>{{ transaction.property.title }}</h4>
+                                            <p class="property-location">{{ transaction.property.location }}</p>
+                                        </div>
+                                        <div class="transaction-amount">
+                                            <strong>KSh {{ transaction.amount|floatformat:0 }}</strong>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="transaction-details">
+                                        <div class="transaction-meta">
+                                            <span class="transaction-date">
+                                                <i class="fas fa-calendar"></i>
+                                                {{ transaction.created_at|date:"M d, Y H:i" }}
+                                            </span>
+                                            <span class="transaction-status {{ transaction.status }}">
+                                                {{ transaction.status|title }}
+                                            </span>
+                                            {% if transaction.mpesa_receipt_number %}
+                                            <span class="transaction-receipt">
+                                                <i class="fas fa-receipt"></i>
+                                                {{ transaction.mpesa_receipt_number }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        {% if transaction.result_desc %}
+                                        <div class="transaction-message">
+                                            {{ transaction.result_desc }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-credit-card fa-3x"></i>
+                    <h3>No Payments Yet</h3>
+                    <p>You haven't made any payments yet. Browse properties and make your first payment!</p>
+                    <a href="{% url 'properties:property_list' %}" class="btn btn-primary">Browse Properties</a>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+    .transactions-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .transaction-item {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .transaction-item:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .transaction-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .transaction-property h4 {
+        margin: 0 0 0.25rem;
+        color: var(--text-primary);
+    }
+
+    .property-location {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .transaction-amount {
+        font-size: 1.25rem;
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+
+    .transaction-details {
+        border-top: 1px solid var(--border-color);
+        padding-top: 1rem;
+    }
+
+    .transaction-meta {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.5rem;
+    }
+
+    .transaction-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .transaction-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .transaction-status.pending {
+        background: var(--warning-light);
+        color: var(--warning);
+    }
+
+    .transaction-status.completed {
+        background: var(--success-light);
+        color: var(--success);
+    }
+
+    .transaction-status.failed {
+        background: var(--danger-light);
+        color: var(--danger);
+    }
+
+    .transaction-message {
+        background: var(--bg-light);
+        padding: 0.75rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        margin-bottom: 1rem;
+        color: var(--color-gray-light);
+    }
+
+    .empty-state h3 {
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    @media (max-width: 768px) {
+        .transaction-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .transaction-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
